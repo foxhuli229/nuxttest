@@ -30,7 +30,7 @@ export default {
   /*
    ** Global CSS
    */
-  css: ['element-ui/lib/theme-chalk/index.css'],
+  css: ['element-ui/lib/theme-chalk/index.css', 'assets/css/transition.css'],
   /*
    ** Plugins to load before mounting the App
    ** https://nuxtjs.org/guide/plugins
@@ -39,7 +39,11 @@ export default {
   plugins: [{
     src: '@/plugins/element-ui',
     ssr: true
-  }],
+  },
+  {
+    src: '@/plugins/router'
+  }
+],
   /*
    ** Auto import components
    ** See https://nuxtjs.org/api/configuration-components
@@ -90,6 +94,14 @@ export default {
   },
 
   router: {
-    middleware: 'auth'
+    middleware: 'auth',
+    extendRoutes(routes, resolve) {
+      //扩展路由
+      routes.push({
+        name: 'home',
+        path: '/index',
+        component: resolve(__dirname, 'pages/index.vue')
+      })
+    }
   }
 }

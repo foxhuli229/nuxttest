@@ -1,20 +1,27 @@
 <template>
   <div>
-    <!-- 约定式导航 -->
-    <nuxt-link to="/">首页</nuxt-link>
-    <nuxt-link to="/login">登录页</nuxt-link>
-    <nuxt-link to="/reg">注册页</nuxt-link>
-    <nuxt-link to="/userinfo">用户中心页</nuxt-link>
-    <nuxt-link to="/goods">商品页</nuxt-link>
+    <app-header></app-header>
     <Nuxt />
   </div>
 </template>
 
 <script>
+import AppHeader from './header'
 export default {
   // middleware: 'auth', //页面层级中间件定义
-  middleware(context) {
-    console.log("middleware layouts");
+  middleware ({store, route, redirect, params, query}) {
+    /***
+    * store：状态树信息
+    * route： 一条目标路由信息
+    * redirect：强制跳转
+    * params,query: 路由参数
+    */
+   console.log("middleware layouts 全局守卫前置业务");
+
+
+  },
+  components: {
+    AppHeader
   }
 }
 </script>

@@ -1,0 +1,10 @@
+
+/* 路由统一动画 */
+.page-enter-active, .page-leave-active {
+    transition: opacity .5s;
+}
+
+/* 进入，退出效果 */
+.page-enter, .page-leave-active {
+    opacity: 0;
+}

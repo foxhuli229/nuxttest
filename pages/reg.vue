@@ -6,7 +6,14 @@
 
 <script>
 export default {
-
+  /**
+   * 路由后置
+   */
+  beforeRouteLeave (to, from, next) {
+    // ...
+    let b1 = window.confirm("是否要离开");
+    next()
+  }
 }
 </script>
 

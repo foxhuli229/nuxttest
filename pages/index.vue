@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <div>
       <div class="container">
         <div class="div1">
           <el-button type="primary">按钮</el-button>
@@ -14,7 +13,6 @@
           </li>
         </ul>
       </div>
-    </div>
   </div>
 </template>
 
