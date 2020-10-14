@@ -1,4 +1,5 @@
 # nuxt
+> 学习网址：https://www.bilibili.com/video/BV13Z4y1T74J?from=search&seid=16132199821601797378
 
 [TOC]
 
@@ -273,3 +274,297 @@ export default {
 
 使用vue的 `beforeRouteLeave`钩子
 
+## 10. 跨域
+
+> 参考链接：https://www.cnblogs.com/fqh123/p/12952646.html
+
+客户端跨域，服务端跨域。
+
+前提需要安装 axios, @nuxtjs/axios, @nuxtjs/proxy 依赖
+
+1. 封装 `axios.js`
+
+```js
+//在utils文件下新建 request.js
+import axios from 'axios'
+import { MessageBox, Message } from 'element-ui'
+import { getToken } from '~/utils/auth'
+import store from 'store'
+
+// create an axios instance
+const service = axios.create({
+  withCredentials: true,
+  timeout: 5000,
+  headers: {
+    Accept: 'application/json, text/plain, */*; charset=utf-8',
+    "Content-Type": "application/json;charset=utf-8"
+  }
+})
+
+// request interceptor
+service.interceptors.request.use(
+  config => {
+    if (getToken()) {
+      config.headers['Authorization'] = getToken() || ""
+    }
+    return config
+  },
+  error => {
+    console.log(error) // for debug
+    return Promise.reject(error)
+  }
+)
+
+// response interceptor
+service.interceptors.response.use(
+  response => {
+    const res = response.data
+
+    if (res.Header.ResultType !== 1) {
+      Message({
+        message: res.msg || '接口出现错误！',
+        type: 'error',
+        showClose: true,
+        duration: 5 * 1000
+      })
+
+      return Promise.reject(new Error(res.msg || 'error'))
+      // return (res || 'error')
+
+    } else {
+
+      return res
+    }
+  },
+  error => {
+    console.debug(error);
+    // debugger
+    const code = error.response.status || ""; //错误返回状态码
+    if (code === 401) {
+      MessageBox.confirm(
+        '登录状态已过期，请重新登录',
+        '温馨提示', {
+        confirmButtonText: '重新登录',
+        showClose: false,
+        showCancelButton: false,
+        type: 'warning'
+      }
+      ).then(() => {
+
+        // store.dispatch('user/resetToken').then(() => {
+        //   location.reload() // 为了重新实例化vue-router对象 避免bug
+        // })
+      })
+
+      return error.response.data
+
+    } else if (code === 403) {
+      // router.push({
+      //   path: '/401'
+      // })
+    } else {
+      Message({
+        message: error.response.data.Message || "网络请求出现错误，请重试！",
+        type: 'error',
+        showClose: true,
+        duration: 5 * 1000
+      })
+    }
+    return Promise.reject(error.response.data)
+  }
+)
+
+function api(url, method = 'get', param) {
+  return new Promise((resolve, reject) => {
+    service({
+      method: method,
+      url,
+      data: param,
+      responseType: 'json',
+      params: method === 'post' ? null : param
+    })
+      .then(res => {
+        if (res.code === 200) {
+          return resolve(res)
+        }
+      })
+      .catch(error => {
+        // throw error
+        return reject(error)
+        // if (beforError && typeof(beforError) === 'function')
+        // reject(error)
+      })
+  })
+}
+
+export default {
+  getAxios() {
+    return service
+  },
+  baseApi(url, method, param) {
+    return api(url, method, param)
+  },
+  // get请求
+  get(url, param) {
+    for (var key in param) {
+      let str = param[key]
+      if (typeof str === 'string') {
+        str = str.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;')
+        param[key] = str
+      }
+    }
+    return api(url, 'get', param)
+  },
+  // post请求
+  post(url, param) {
+    return api(url, 'post', param)
+  },
+  // patch请求
+  patch(url, param) {
+    return api(url, 'patch', param)
+  },
+  // put请求
+  put(url, param) {
+    return api(url, 'put', param)
+  },
+  // delete请求
+  delete(url, param) {
+    return api(url, 'delete', param)
+  },
+  service
+}
+
+```
+
+2. 在`nuxt.config.js`的
+
+```js
+ 
+  modules: [
+    // Doc: https://axios.nuxtjs.org/usage
+    '@nuxtjs/axios',
+    '@nuxtjs/proxy'
+  ],
+  axios: {
+    proxy: true,
+    //prefix: '/api/', // ==baseUrl
+    credentials: true
+  },
+  proxy: {
+    '/api/': {
+      target: 'http://121.36.73.246:9004',
+      pathRewite: {
+        changeOrigin: true,
+        // '^/api/': '/api/'
+      }
+    }
+  },
+```
+
+3. 在 uitls文件下 新建 `porxy.js`文件
+
+   ```js
+   const baserUrl = "http://121.36.73.246:9004"
+   
+   let prefix = "";
+   if (process.server) {
+       //服务端不用走本地代理
+       prefix = process.env.NODE_ENV === "production" ? baserUrl : baserUrl + '';
+   }
+   
+   if (process.client) {
+       //客户端需走 本地代理
+       prefix = process.env.NODE_ENV === "production" ? baserUrl : ''
+   }
+   export default {
+       prefix
+   }
+   ```
+
+4. 在项目根目录新建 api文件夹，然后其下面新建 user.js
+
+   ```js
+   import request from '@/utils/request'
+   import proxy from '@/utils/proxy'
+   
+   export function getListHomepage(data) {
+     return request.service({
+       url: proxy.prefix + '/api/http/GetEmissionCostParm',
+       method: 'GET',
+       params: data
+     })
+   }
+   ```
+
+5. 在对应的页面中的  asyncData()使用
+
+   ```js
+     //服务端,  没有window对象
+     async asyncData() {
+       //异步处理业务数据， 读取服务端数据，返回给 data
+       const res = await getListHomepage()
+       return {
+         contList: res.Body.Data || [],
+       }
+     },
+   ```
+
+无论刷新还是页面切换，都不会出现跨域问题。
+
+## 11. 自定义loading页面
+
+1. 自定义系统自带的loading的颜色值
+
+   ```js
+   //在 nuxt.config.js 中
+   loading: {color: '#189off', height: '3px'}
+   ```
+
+2. 自定义loading组件，完全改变
+
+   - 在 nuxt.config.js
+
+     ```js
+     loading: '@/comopnents/loading.vue'
+     ```
+
+   - components文件下新建 loading.vue
+   
+   ```vue
+   <template>
+     <div v-if="loading" class="spinner"></div>
+   </template>
+   
+   <script>
+   export default {
+     name: 'loading',
+     data() {
+       return {
+         loading: false,
+       }
+     },
+     methods: {
+         //自带的2个函数，开始
+       start() {
+         this.loading = true
+       },
+         //结束
+       finish() {
+         this.loading = false
+       },
+     },
+   }
+   </script>
+   ```
+
+## 12. vuex
+
+ ### 1. 模块方式
+
+`store`目录下的每一个 `.js`文件都会被转换成 状态树（当然 `index`是根模块）
+
+
+
+### 2. Classis(不建议使用)
+
+`store/index.js`返回创建的 Vuex.Store 实例的方法

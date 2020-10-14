@@ -31,6 +31,14 @@ export default {
    ** Global CSS
    */
   css: ['element-ui/lib/theme-chalk/index.css', 'assets/css/transition.css'],
+
+  /**
+  * 自定义loading
+  * 定义系统默认的loading效果，或者指定 loading组件
+  */
+  // loading: { color: '#1890ff', height: '3px' },
+  loading: '@/components/loading.vue',
+
   /*
    ** Plugins to load before mounting the App
    ** https://nuxtjs.org/guide/plugins
@@ -42,8 +50,12 @@ export default {
   },
   {
     src: '@/plugins/router'
+  },
+  {
+    src: '@/plugins/axios',
+    ssr: true
   }
-],
+  ],
   /*
    ** Auto import components
    ** See https://nuxtjs.org/api/configuration-components
@@ -61,7 +73,6 @@ export default {
    ** Nuxt.js modules
    */
   modules: [
-    // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     '@nuxtjs/proxy'
   ],
@@ -71,8 +82,8 @@ export default {
    */
   axios: {
     proxy: true,
-    prefix: '/api/',
-    credentials: true
+    // prefix: '/api/', //baseUrl前缀
+    credentials: true // 表示跨域请求时是否需要使用凭证
   },
 
   proxy: {
@@ -80,7 +91,7 @@ export default {
       target: 'http://121.36.73.246:9004',
       pathRewite: {
         changeOrigin: true,
-        '^/api/': '/api/'
+        // '^/api/': '/api/'
       }
     }
   },
@@ -91,6 +102,7 @@ export default {
    */
   build: {
     transpile: [/^element-ui/],
+    vendor: ['axios'],//防止重复渲染
   },
 
   router: {
@@ -103,5 +115,8 @@ export default {
         component: resolve(__dirname, 'pages/index.vue')
       })
     }
-  }
+  },
+
+
+
 }

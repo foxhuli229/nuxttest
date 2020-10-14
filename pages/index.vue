@@ -1,18 +1,21 @@
 <template>
   <div class="container">
-      <div class="container">
-        <div class="div1">
-          <el-button type="primary">按钮</el-button>
-          <span>{{name}}</span>
-        </div>
-        <ul>
-          <li v-for="(item, index) in contList"
-              :key="index">
-            <div class="title">{{item.Area}}</div>
-            <div class="cont">{{item.Area}} {{index + 1}}</div>
-          </li>
-        </ul>
+    <div class="container">
+      <div class="div1">
+        <el-button type="primary">按钮</el-button>
+        <span>{{ name }}</span>
       </div>
+      <h2>跨域资源</h2>
+      <br />
+      <hr />
+      <br />
+      <ul>
+        <li v-for="(item, index) in contList" :key="index">
+          <div class="title">{{ item.Area }}</div>
+          <div class="cont">{{ item.Area }} {{ index + 1 }}</div>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -20,54 +23,47 @@
 import { getListHomepage } from '~/api/user'
 export default {
   //页面加载前执行
-  middleware (context) {
-    console.log("middleware pages");
+  middleware(context) {
+    // console.log('middleware pages')
   },
 
   //参数的有效性验证
-  validate ({ params, query }) {
+  validate({ params, query }) {
     //校验业务
-    console.log("validate");
+    // console.log('validate')
     return true
   },
-  //不会走请求，所有不会存在跨域, 服务端,  没有window对象
-  async asyncData () {
+  //服务端,  没有window对象
+  async asyncData() {
+    console.log('server:', process.server)
+    console.log('client:', process.client)
     //异步处理业务数据， 读取服务端数据，返回给 data
-    console.log('我是asyncData--------------');
-    // const res = await getListHomepage()
-    // return {
-    //   contList: res.Body.Data || [],
-    // }
+    const res = await getListHomepage()
+    return {
+      contList: res.Body.Data || [],
+    }
   },
 
   //读取数据，返回给 vuex
-  fetch ({ store }) {
+  fetch({ store }) {
     //异步处理业务数据， 读取服务端数据，返回给 vuex
-    console.log("fech");
+    // console.log('fech')
   },
 
-
-  data () {
+  data() {
     return {
       name: '我是首页，默认显示首页我哦！！！',
-      contList: []
+      contList: [],
     }
   },
-  mounted () {
-  },
-  methods: {
-
-  },
-
-
+  mounted() {},
+  methods: {},
 
   //CSR
-  beforeCreate () {
+  beforeCreate() {
     //在客户端和服务端都要打印
   },
-  created () {
-
-  }
+  created() {},
 }
 </script>
 

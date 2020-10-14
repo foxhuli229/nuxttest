@@ -1,0 +1,8 @@
+{
+    "Header": {
+        "ResultType": 1
+    },
+    "Body": {
+        "title": "nuxt数据"
+    }
+}

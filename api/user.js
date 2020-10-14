@@ -1,9 +1,10 @@
 import request from '@/utils/request'
+import proxy from '@/utils/proxy'
 // import qs from 'qs'
 
 export function getListHomepage(data) {
   return request.service({
-    url: 'http://121.36.73.246:9004/api/http/GetEmissionCostParm',
+    url: proxy.prefix + '/api/http/GetEmissionCostParm',
     method: 'GET',
     params: data
   })

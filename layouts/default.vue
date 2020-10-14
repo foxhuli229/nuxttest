@@ -16,7 +16,7 @@ export default {
     * redirect：强制跳转
     * params,query: 路由参数
     */
-   console.log("middleware layouts 全局守卫前置业务");
+  //  console.log("middleware layouts 全局守卫前置业务");
 
 
   },

@@ -1,5 +1,5 @@
 export default  ({app, redirect }) => {
-    console.log("router.js 插件");
+    // console.log("router.js 插件");
 
     /**
      * app == vue 实例

@@ -10,7 +10,7 @@
 export default {
   name: 'goodsDetail',
   validate({params, query}) {
-    console.log("goods-id:",params, query);
+    // console.log("goods-id:",params, query);
     return typeof params.id === 'number' ? true : false;
   },
   data () {
